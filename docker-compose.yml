@@ -1,0 +1,39 @@
+# docker compose up -d --> iniciar
+# docker compose stop --> parar
+
+# CUIDADO! docker compose down --> para e apaga os containers
+
+
+# docker run --name api-solid-pg -e POSTGRESQL_USERNAME=docker -e POSTGRESQL_PASSWORD=docker -e POSTGRESQL_DATABASE=apisolid -p 5432:5432 bitnami/postgresql:latest
+
+
+# docker run
+#  --name api-solid-pg
+#    -e POSTGRESQL_USERNAME=docker
+#    -e POSTGRESQL_PASSWORD=docker
+#    -e POSTGRESQL_DATABASE=apisolid
+#    -p 5432:5432
+#    bitnami/postgresql:latest
+
+
+# docker run
+#  --name api-solid-pg:
+#    image: bitnami/postgresql:latest
+#    ports: 5432:5432
+#    environment:
+#        -e POSTGRESQL_USERNAME=docker
+#        -e POSTGRESQL_PASSWORD=docker
+#        -e POSTGRESQL_DATABASE=apisolid
+
+
+version: '3'
+
+services:
+  api-solid-pg:
+    image: bitnami/postgresql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRESQL_USERNAME=docker
+      - POSTGRESQL_PASSWORD=docker
+      - POSTGRESQL_DATABASE=ignitenode03
