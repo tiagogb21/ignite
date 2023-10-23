@@ -1,7 +1,8 @@
 import request from 'supertest';
-import { app } from '@/app';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import httpStatus from 'http-status';
+
+import app from '@/app';
 
 const userMocka = {
     name: 'John Doe',

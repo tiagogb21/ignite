@@ -26,7 +26,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var import_fastify = __toESM(require("fastify"));
 var import_client2 = require("@prisma/client");
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 var import_http_status = __toESM(require("http-status"));
 
 // src/utils/schema/user/userBody.ts
@@ -107,7 +107,7 @@ var PrismaUsersRepository = class {
   }
 };
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 async function register(request, reply) {
   const { name, email, password } = registerBodySchema.parse(request.body);
   const registerUseCase = new RegisterUseCase(new PrismaUsersRepository());
@@ -143,9 +143,10 @@ async function userRoutes(app2) {
 var app = (0, import_fastify.default)();
 var prisma2 = new import_client2.PrismaClient();
 app.register(userRoutes);
+var app_default = app;
 
 // src/server.ts
-app.listen({
+app_default.listen({
   host: "0.0.0.0",
   port: env.PORT
 }).then(() => {

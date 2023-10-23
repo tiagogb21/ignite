@@ -27,7 +27,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 var register_exports = {};
 __export(register_exports, {
   register: () => register
@@ -113,7 +113,7 @@ var PrismaUsersRepository = class {
   }
 };
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 async function register(request, reply) {
   const { name, email, password } = registerBodySchema.parse(request.body);
   const registerUseCase = new RegisterUseCase(new PrismaUsersRepository());

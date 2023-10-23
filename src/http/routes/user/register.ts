@@ -1,4 +1,4 @@
-import { register } from "@/http/controllers/user/register";
+import { register } from "@/http/controllers/users/register";
 import { verifyUserWithSameEmailExists } from "@/http/middlewares/user/verifyUserWithSameEmailExists";
 import { FastifyInstance } from "fastify";
 

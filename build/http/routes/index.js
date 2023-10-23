@@ -34,7 +34,7 @@ __export(routes_exports, {
 });
 module.exports = __toCommonJS(routes_exports);
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 var import_http_status = __toESM(require("http-status"));
 
 // src/utils/schema/user/userBody.ts
@@ -115,7 +115,7 @@ var PrismaUsersRepository = class {
   }
 };
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 async function register(request, reply) {
   const { name, email, password } = registerBodySchema.parse(request.body);
   const registerUseCase = new RegisterUseCase(new PrismaUsersRepository());

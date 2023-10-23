@@ -602,16 +602,163 @@ var require_get_intrinsic = __commonJS({
   }
 });
 
+// node_modules/has-property-descriptors/index.js
+var require_has_property_descriptors = __commonJS({
+  "node_modules/has-property-descriptors/index.js"(exports, module2) {
+    "use strict";
+    var GetIntrinsic = require_get_intrinsic();
+    var $defineProperty = GetIntrinsic("%Object.defineProperty%", true);
+    var hasPropertyDescriptors = function hasPropertyDescriptors2() {
+      if ($defineProperty) {
+        try {
+          $defineProperty({}, "a", { value: 1 });
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    };
+    hasPropertyDescriptors.hasArrayLengthDefineBug = function hasArrayLengthDefineBug() {
+      if (!hasPropertyDescriptors()) {
+        return null;
+      }
+      try {
+        return $defineProperty([], "length", { value: 1 }).length !== 1;
+      } catch (e) {
+        return true;
+      }
+    };
+    module2.exports = hasPropertyDescriptors;
+  }
+});
+
+// node_modules/gopd/index.js
+var require_gopd = __commonJS({
+  "node_modules/gopd/index.js"(exports, module2) {
+    "use strict";
+    var GetIntrinsic = require_get_intrinsic();
+    var $gOPD = GetIntrinsic("%Object.getOwnPropertyDescriptor%", true);
+    if ($gOPD) {
+      try {
+        $gOPD([], "length");
+      } catch (e) {
+        $gOPD = null;
+      }
+    }
+    module2.exports = $gOPD;
+  }
+});
+
+// node_modules/define-data-property/index.js
+var require_define_data_property = __commonJS({
+  "node_modules/define-data-property/index.js"(exports, module2) {
+    "use strict";
+    var hasPropertyDescriptors = require_has_property_descriptors()();
+    var GetIntrinsic = require_get_intrinsic();
+    var $defineProperty = hasPropertyDescriptors && GetIntrinsic("%Object.defineProperty%", true);
+    if ($defineProperty) {
+      try {
+        $defineProperty({}, "a", { value: 1 });
+      } catch (e) {
+        $defineProperty = false;
+      }
+    }
+    var $SyntaxError = GetIntrinsic("%SyntaxError%");
+    var $TypeError = GetIntrinsic("%TypeError%");
+    var gopd = require_gopd();
+    module2.exports = function defineDataProperty(obj, property, value) {
+      if (!obj || typeof obj !== "object" && typeof obj !== "function") {
+        throw new $TypeError("`obj` must be an object or a function`");
+      }
+      if (typeof property !== "string" && typeof property !== "symbol") {
+        throw new $TypeError("`property` must be a string or a symbol`");
+      }
+      if (arguments.length > 3 && typeof arguments[3] !== "boolean" && arguments[3] !== null) {
+        throw new $TypeError("`nonEnumerable`, if provided, must be a boolean or null");
+      }
+      if (arguments.length > 4 && typeof arguments[4] !== "boolean" && arguments[4] !== null) {
+        throw new $TypeError("`nonWritable`, if provided, must be a boolean or null");
+      }
+      if (arguments.length > 5 && typeof arguments[5] !== "boolean" && arguments[5] !== null) {
+        throw new $TypeError("`nonConfigurable`, if provided, must be a boolean or null");
+      }
+      if (arguments.length > 6 && typeof arguments[6] !== "boolean") {
+        throw new $TypeError("`loose`, if provided, must be a boolean");
+      }
+      var nonEnumerable = arguments.length > 3 ? arguments[3] : null;
+      var nonWritable = arguments.length > 4 ? arguments[4] : null;
+      var nonConfigurable = arguments.length > 5 ? arguments[5] : null;
+      var loose = arguments.length > 6 ? arguments[6] : false;
+      var desc = !!gopd && gopd(obj, property);
+      if ($defineProperty) {
+        $defineProperty(obj, property, {
+          configurable: nonConfigurable === null && desc ? desc.configurable : !nonConfigurable,
+          enumerable: nonEnumerable === null && desc ? desc.enumerable : !nonEnumerable,
+          value,
+          writable: nonWritable === null && desc ? desc.writable : !nonWritable
+        });
+      } else if (loose || !nonEnumerable && !nonWritable && !nonConfigurable) {
+        obj[property] = value;
+      } else {
+        throw new $SyntaxError("This environment does not support defining a property as non-configurable, non-writable, or non-enumerable.");
+      }
+    };
+  }
+});
+
+// node_modules/set-function-length/index.js
+var require_set_function_length = __commonJS({
+  "node_modules/set-function-length/index.js"(exports, module2) {
+    "use strict";
+    var GetIntrinsic = require_get_intrinsic();
+    var define2 = require_define_data_property();
+    var hasDescriptors = require_has_property_descriptors()();
+    var gOPD = require_gopd();
+    var $TypeError = GetIntrinsic("%TypeError%");
+    var $floor = GetIntrinsic("%Math.floor%");
+    module2.exports = function setFunctionLength(fn2, length) {
+      if (typeof fn2 !== "function") {
+        throw new $TypeError("`fn` is not a function");
+      }
+      if (typeof length !== "number" || length < 0 || length > 4294967295 || $floor(length) !== length) {
+        throw new $TypeError("`length` must be a positive 32-bit integer");
+      }
+      var loose = arguments.length > 2 && !!arguments[2];
+      var functionLengthIsConfigurable = true;
+      var functionLengthIsWritable = true;
+      if ("length" in fn2 && gOPD) {
+        var desc = gOPD(fn2, "length");
+        if (desc && !desc.configurable) {
+          functionLengthIsConfigurable = false;
+        }
+        if (desc && !desc.writable) {
+          functionLengthIsWritable = false;
+        }
+      }
+      if (functionLengthIsConfigurable || functionLengthIsWritable || !loose) {
+        if (hasDescriptors) {
+          define2(fn2, "length", length, true, true);
+        } else {
+          define2(fn2, "length", length);
+        }
+      }
+      return fn2;
+    };
+  }
+});
+
 // node_modules/call-bind/index.js
 var require_call_bind = __commonJS({
   "node_modules/call-bind/index.js"(exports, module2) {
     "use strict";
     var bind = require_function_bind();
     var GetIntrinsic = require_get_intrinsic();
+    var setFunctionLength = require_set_function_length();
+    var $TypeError = GetIntrinsic("%TypeError%");
     var $apply = GetIntrinsic("%Function.prototype.apply%");
     var $call = GetIntrinsic("%Function.prototype.call%");
     var $reflectApply = GetIntrinsic("%Reflect.apply%", true) || bind.call($call, $apply);
-    var $gOPD = GetIntrinsic("%Object.getOwnPropertyDescriptor%", true);
     var $defineProperty = GetIntrinsic("%Object.defineProperty%", true);
     var $max = GetIntrinsic("%Math.max%");
     if ($defineProperty) {
@@ -622,18 +769,15 @@ var require_call_bind = __commonJS({
       }
     }
     module2.exports = function callBind(originalFunction) {
-      var func = $reflectApply(bind, $call, arguments);
-      if ($gOPD && $defineProperty) {
-        var desc = $gOPD(func, "length");
-        if (desc.configurable) {
-          $defineProperty(
-            func,
-            "length",
-            { value: 1 + $max(0, originalFunction.length - (arguments.length - 1)) }
-          );
-        }
+      if (typeof originalFunction !== "function") {
+        throw new $TypeError("a function is required");
       }
-      return func;
+      var func = $reflectApply(bind, $call, arguments);
+      return setFunctionLength(
+        func,
+        1 + $max(0, originalFunction.length - (arguments.length - 1)),
+        true
+      );
     };
     var applyBind = function applyBind2() {
       return $reflectApply(bind, $apply, arguments);
@@ -888,11 +1032,11 @@ var require_object_inspect = __commonJS({
       if (isString(obj)) {
         return markBoxed(inspect3(String(obj)));
       }
+      if (typeof window !== "undefined" && obj === window) {
+        return "{ [object Window] }";
+      }
       if (obj === global) {
-        if (typeof window !== "undefined") {
-          return "{ [object Window] }";
-        }
-        return "{ [object global] }";
+        return "{ [object globalThis] }";
       }
       if (!isDate(obj) && !isRegExp(obj)) {
         var ys = arrObjKeys(obj, inspect3);
@@ -26829,14 +26973,14 @@ var init_magic_string_es = __esm({
   }
 });
 
-// src/http/controllers/user/register.spec.ts
+// src/http/controllers/users/register.spec.ts
 var import_supertest = __toESM(require_supertest());
 
 // src/app.ts
 var import_fastify = __toESM(require("fastify"));
 var import_client2 = require("@prisma/client");
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 var import_http_status = __toESM(require("http-status"));
 
 // src/utils/schema/user/userBody.ts
@@ -26917,7 +27061,7 @@ var PrismaUsersRepository = class {
   }
 };
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 async function register(request2, reply) {
   const { name, email, password } = registerBodySchema.parse(request2.body);
   const registerUseCase = new RegisterUseCase(new PrismaUsersRepository());
@@ -26953,6 +27097,7 @@ async function userRoutes(app2) {
 var app = (0, import_fastify.default)();
 var prisma2 = new import_client2.PrismaClient();
 app.register(userRoutes);
+var app_default = app;
 
 // node_modules/@vitest/runner/node_modules/yocto-queue/index.js
 var Node = class {
@@ -34499,23 +34644,21 @@ var index = /* @__PURE__ */ Object.freeze({
 // node_modules/vitest/dist/index.js
 var expectTypeOf = dist.expectTypeOf;
 
-// src/http/controllers/user/register.spec.ts
-var import_http_status3 = __toESM(require("http-status"));
-var userMocka = {
-  name: "John Doe",
-  email: "johndoe@example.com",
-  password: "123456"
-};
+// src/http/controllers/users/register.spec.ts
 describe("Register (e2e)", () => {
   beforeAll(async () => {
-    await app.ready();
+    await app_default.ready();
   });
   afterAll(async () => {
-    await app.close();
+    await app_default.close();
   });
   it("should be able to register", async () => {
-    const response = await (0, import_supertest.default)(app.server).post("/users").send(userMocka);
-    globalExpect(response.statusCode).toEqual(import_http_status3.default.CREATED);
+    const response = await (0, import_supertest.default)(app_default.server).post("/users").send({
+      name: "John Doe",
+      email: "johndoe@example.com",
+      password: "123456"
+    });
+    globalExpect(response.statusCode).toEqual(201);
   });
 });
 /*! Bundled license information:

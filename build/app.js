@@ -30,13 +30,13 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 // src/app.ts
 var app_exports = {};
 __export(app_exports, {
-  app: () => app
+  default: () => app_default
 });
 module.exports = __toCommonJS(app_exports);
 var import_fastify = __toESM(require("fastify"));
 var import_client2 = require("@prisma/client");
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 var import_http_status = __toESM(require("http-status"));
 
 // src/utils/schema/user/userBody.ts
@@ -117,7 +117,7 @@ var PrismaUsersRepository = class {
   }
 };
 
-// src/http/controllers/user/register.ts
+// src/http/controllers/users/register.ts
 async function register(request, reply) {
   const { name, email, password } = registerBodySchema.parse(request.body);
   const registerUseCase = new RegisterUseCase(new PrismaUsersRepository());
@@ -153,7 +153,4 @@ async function userRoutes(app2) {
 var app = (0, import_fastify.default)();
 var prisma2 = new import_client2.PrismaClient();
 app.register(userRoutes);
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  app
-});
+var app_default = app;
